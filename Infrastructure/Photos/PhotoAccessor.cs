@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Application.interfaces;
 using Application.Photos;
 using CloudinaryDotNet;
@@ -13,20 +10,22 @@ namespace Infrastructure.Photos
 {
     public class PhotoAccessor : IPhotoAccessor
     {
-        private readonly Cloudinary cloudinary;
+        private readonly Cloudinary _cloudinary;
       public PhotoAccessor(IOptions<CloudinarySettings> config)
         {
              var account = new Account(
                 config.Value.CloudName,
                 config.Value.ApiKey,
-                config.Value.ApiSecret);
+                config.Value.ApiSecret
+                
+               );
 
-                cloudinary = new Cloudinary(account);
+                _cloudinary = new Cloudinary(account);
         }
     
         public async Task<PhotoUploadResult> AddPhoto(IFormFile file)
         {
-          if(file.Length >0)
+          if(file.Length > 0)
           {
              await using var stream = file.OpenReadStream();
              var uploadParams = new ImageUploadParams
@@ -35,7 +34,7 @@ namespace Infrastructure.Photos
                 Transformation = new Transformation().Height(500).Width(500).Crop("fill")
              };
 
-             var uploadResult = await cloudinary.UploadAsync(uploadParams);
+             var uploadResult = await _cloudinary.UploadAsync(uploadParams);
 
              if(uploadResult.Error != null)
              {
@@ -54,7 +53,7 @@ namespace Infrastructure.Photos
         public  async Task<string> DeletePhoto(string publicId)
         {
              var deleteParams = new DeletionParams(publicId);
-             var result = await cloudinary.DestroyAsync(deleteParams);
+             var result = await _cloudinary.DestroyAsync(deleteParams);
 
              return result.Result == "ok" ? result.Result :null;
         }
